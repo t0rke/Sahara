@@ -21,13 +21,13 @@
 // priority, to, from, product_code
 class product {
 public:
-    size_t hash;
+    uint64_t hash;
     std::string name;
     double price;
-    double length, width, height, weight;
-    double volume;
+    double weight, volume;
+    double small, middle, large;
     
-    product (std::string name, size_t hash);
+    product(const std::string name, const uint64_t hash);
   
     void info ();
     //product (string name, double price, double length, double width, double height, double weight) :

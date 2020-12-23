@@ -21,8 +21,6 @@ int main(int argc, const char * argv[]) {
     // insert chode here...
     std::cout << "Hello, World!\n";
     
-    uint64_t x(10594029800330007);
-    cout << x % 1000 << endl;
 }
 
 

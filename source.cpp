@@ -11,20 +11,19 @@ using namespace std;
 
 //////////////////////////////////////////PRODUCT FUNCTIONS//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // determines product information from the product hash
-product::product(string name, size_t hash) : name(name), hash(hash) {
-    length = 0;
-    width = 0;
-    height = 0;
-    weight = 0;
-    volume = 0;
+product::product(const string name, const uint64_t hash) : name(name), hash(hash) {
+
+    // insert code here:
+    
+    
+    
+    
 }
 // prints the relevant product information
 void product::info() {
     cout << "NAME: " << name << endl;
     cout << "Price: " << price << endl;
-    cout << "Length: " << length << endl;
-    cout << "Width: " << width << endl;
-    cout <<  "Height: " << height << endl;
+    cout << "Dim: " << endl;
     cout << "Weight: " << weight << endl;
 }
 
