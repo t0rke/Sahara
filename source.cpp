@@ -14,9 +14,9 @@ using namespace std;
 product::product(const string name, const uint64_t hash) : name(name), hash(hash) {
     weight = hash % 10000;
     const size_t height = ((hash % 100000000) - weight) / 10000;
-    const size_t width = ((hash % 100000000000) - (height * 10000) - weight) / 100000000;
-    const size_t length = ((hash % 1000000000000000) - (width * 100000000) - (height * 10000) - weight) / 1000000000000;
-
+    const size_t width = ((hash % 1000000000000) - (height * 10000) - weight) / 100000000;
+    const size_t length = ((hash % 10000000000000000) - (width * 100000000) - (height * 10000) - weight) / 1000000000000;
+    
     size_t t_lar = std::max({height,width, length});
     size_t t_sma = std::min({height, width, length});
     size_t t_mid = height ^ width ^ length ^ t_lar ^ t_sma;
@@ -24,8 +24,9 @@ product::product(const string name, const uint64_t hash) : name(name), hash(hash
     large = t_lar / 100.0;
     middle = t_mid / 100.0;
     small = t_sma / 100.0;
+    weight /= 10.0;
     volume = large * middle * small;
-    //cout << large << " " << middle << " "  << small << " " << weight << endl;
+    cout << name + ": "<< large << " " << middle << " "  << small << " " << weight << " [" << volume << "]" << endl;
 }
 // prints the relevant product information
 void product::info() {
