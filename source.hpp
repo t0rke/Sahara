@@ -9,8 +9,6 @@
 #define source_hpp
 
 #include <stdio.h>
-
-
 #include <iostream>
 #include <vector>
 #include <random>
@@ -21,15 +19,16 @@
 // priority, to, from, product_code
 class product {
 public:
+    size_t location;
     uint64_t hash;
     std::string name;
     double price;
     double weight, volume;
     double small, middle, large;
-    
-    product(const std::string name, const uint64_t hash);
+
+    product(const std::string name, const uint64_t hash, const size_t location);
   
-    void info ();
+    void info();
     //product (string name, double price, double length, double width, double height, double weight) :
     //length(length), width(width), height(height), weight(weight) {};
     
@@ -53,16 +52,49 @@ public:
     product product;
     location location;
     
-    package (class product product, class location location);
+    package (class product &product, class location &location);
+    
     void display();
     
 };
 
 
 
-class secure {
-    //vector<product> catalogue {{"iPad Pro", 799.99, 18, 14, 8, },
-    //    {"iPad Air" }, "iPad", "iPhone Pro Max", "iPhone 12", "iPhone Pro Mini"};
+struct sahara {
+    const std::vector<product> catalogue {
+        {"iPhone XR", 10594029800330069, 48336},
+        {"iPhone X",  10006102504500062, 48336},
+        {"iPad Pro",  10950073200380230, 51031},
+    };
+    
+    //const std::vector<int>
+    //constexpr string hello = "hello";
+    
+};
+
+class customer {
+public:
+    // shipping priority
+    bool supreme;
+    // coordinate pairs
+    std::pair<int, int> address;
+    std::string name;
+    // holds the 2 dimensional products locations
+    std::vector<product> order;
+    sahara sahara;
+    
+    customer();
+         
+    // will give and X and Y coordinate of the shipping address
+    void assign_address();
+    
+    // will determine the aproximate shippint i.e plane, truck etc. and provide an estimated time of shipping.
+    void assign_shipping();
+    
+    void construct_packages();
+    
+    
+    
 };
 
 #endif /* source_hpp */
