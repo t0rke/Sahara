@@ -82,8 +82,14 @@ void customer::assign_shipping() {
     supreme = (distr(gen) == 1 ? true : false);
 }
 
-size_t package_classifier () {
-   // if ( ) {}
+size_t customer::package_classifier (vector<size_t> &resort_splice) {
+    
+    if (resort_splice.size() > 1) {
+        
+    }
+    else {
+        
+    }
     
     return 0;
 }
@@ -104,17 +110,34 @@ void customer::construct_packages() {
         order.reserve(num_products);
         uniform_int_distribution<> udistr(0, int(sahara.catalogue.size()) - 1);
         for (size_t i = 0; i < num_products; ++i) {
-            order.emplace_back(sahara.catalogue[udistr(gen)]);
-            //cout << sahara.catalogue[udistr(gen)].name << endl;
+            order.push_back(sahara.catalogue[udistr(gen)]);
+            cout << sahara.catalogue[udistr(gen)].name << endl;
+        }
+        // sorts the product in an order
+        sort(begin(order), end(order), compare());
+        vector<vector<size_t>> resort;
+        
+        
+        // will not ship two of the same products in a single package!!!
+        vector<size_t>temp;
+        temp.push_back(0);
+        for (size_t i = 1; i < order.size(); ++i) {
+            if (order[i - 1].location == order[i].location) {
+                temp.push_back(i);
+            }
+            else {
+                resort.push_back(temp);
+                temp.clear();
+                temp.push_back(i);
+            }
+        }
+        resort.push_back(temp);
+        for (int i = 0; i < resort.size(); ++i) {
+            for (int j = 0; j < resort[i].size(); ++j) {
+                cout << resort[i][j] << " ";
+            }
+            cout << endl;
         }
     }
-    // sorts the product in an order
-    //sort(begin(order), end(order), compare());
-    //vector<vector<size_t>> resort();
-    //resort.reserve(order.size());
-     
-    
-    
-    
-    //package package;
+    else cout << "No Order" << endl;
 }

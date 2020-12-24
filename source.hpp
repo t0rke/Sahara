@@ -63,20 +63,20 @@ public:
 struct sahara {
    const std::vector<product> catalogue {
 		{"iPhone XR",					10594029800330069, 48336},
-		{"iPhone X",					10006102504500062, 48336},
-		{"iPad Pro",					10950073200380230, 51031},
-		{"iPad Air",					10974070000241600, 51031},
-		{"iPad",						10980068000291745, 51031},
-		{"iPad Mini",					10800053000241056, 51031},
+		{"iPhone X",					10060102504500062, 48336},
+		{"iPad Pro",					10950073200380230, 48168},
+		{"iPad Air",					10974070000241600, 48168},
+		{"iPad",						10980068000291745, 48168},
+		{"iPad Mini",					10800053000241056, 48168},
 		{"iPhone 12 Pro",				10578028200290666, 51031},
 		{"iPhone 12 Pro Max",			10633030700290803, 51031},
 		{"iPhone 12 mini",				10518025300290476, 51031},
 		{"iPhone 12",					10578028200290578, 51031},
-		{"MacBook Air",					10063119708360448, 51031},
-		{"MacBook Pro",					10061119708364800, 51031},
+		{"MacBook Air",					10063119708360448, 71736},
+		{"MacBook Pro",					10061119708364800, 71736},
 		{"Apple Watch Series 6 (44m)",	10174015000430167, 51031},
 		{"Apple Watch Series 6 (40m)",	10158013400430150, 51031},
-		{"AirPods Pro ",				10239017800850161, 51031},
+		{"AirPods Pro ",				10239017800850161, 71736},
 
 	};
 
@@ -85,6 +85,8 @@ struct sahara {
     //constexpr string hello = "hello";
     
 };
+
+//vector<tuple>sizing_chart();
 
 class customer {
 public:
@@ -106,6 +108,8 @@ public:
     void assign_shipping();
     
     void construct_packages();
+    
+    size_t package_classifier(std::vector<size_t> &resort_splice);
     
     
     
