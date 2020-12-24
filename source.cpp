@@ -83,7 +83,7 @@ void customer::assign_shipping() {
 }
 
 size_t package_classifier () {
-    if (
+   // if ( ) {}
     
     return 0;
 }
@@ -107,10 +107,13 @@ void customer::construct_packages() {
             order.emplace_back(sahara.catalogue[udistr(gen)]);
             //cout << sahara.catalogue[udistr(gen)].name << endl;
         }
-        
-        
     }
     // sorts the product in an order
+    //sort(begin(order), end(order), compare());
+    //vector<vector<size_t>> resort();
+    //resort.reserve(order.size());
+     
+    
     
     
     //package package;
