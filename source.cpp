@@ -76,7 +76,24 @@ customer::customer() {
 };
 
 void customer::generate_profile() {
-    
+    std::ifstream file;
+	file.open("Lnames.txt", ios::in);
+	vector <string> names;
+	string name;
+	names.reserve(62644);
+	int i = 0;
+	while (getline(file, name)) {
+
+		getline(file, name);
+		names.push_back(name);
+		if (i % 14 == 0) {
+			cout << name << endl;
+		}
+		else {
+
+		}
+		i++;
+	}
 }
 
 void customer::assign_address() {
