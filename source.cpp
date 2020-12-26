@@ -17,6 +17,8 @@ struct compare {
 };
 
 
+double verbose = true;
+
 //////////////////////////////////////////PRODUCT FUNCTIONS//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // determines and assigns product specs (lWH) from hash int
 
@@ -31,12 +33,13 @@ product::product(const string name, const uint64_t hash, size_t location) : name
     size_t t_sma = std::min({height, width, length});
     size_t t_mid = height ^ width ^ length ^ t_lar ^ t_sma;
     
-    large = t_lar / 100.0;
-    middle = t_mid / 100.0;
-    small = t_sma / 100.0;
-    weight /= 10.0;
-    volume = large * middle * small;
-    cout << name + ": "<< large << " " << middle << " "  << small << " " << weight << " [" << volume << "]" << endl;
+    dimensions.resize(3);
+    dimensions[0] = t_lar / 100.0;
+    dimensions[1] = t_mid / 100.0;
+    dimensions[2] = t_sma / 100.0;
+    weight /= 100.0;
+    volume = dimensions[0] * dimensions[1] * dimensions[2];
+    // cout << name + ": "<< dimensions[0] << " " << dimensions[1] << " "  << dimensions[2] << " " << weight << " [" << volume << "]" << endl;
 }
 // prints the relevant product information
 void product::info() {
@@ -49,16 +52,17 @@ void product::info() {
 //////////////////////////////////////////LOCATION FUNCTIONS//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 location::location() {};
 
-location::location(size_t to, size_t from) : to(to), from (from) {};
+location::location(pair<int,int> address, size_t from) : to(address), from (from) {};
 
 
-//////////////////////////////////////////PACKAGE FUNCTIONS///////////////////////////////////////////////////////////////////////////////////////////////////////
-package::package (class product &product, class location &location) : product(product), location(location) {};
+//////////////////////////////////////////PACKAGE FUNCTIONS////////////////////////////////////////////////////////////////////////////////////////////////////////////
+package::package(vector<size_t> indices, class location &location, size_t dim_index, double net_weight) :
+    product_indices(indices), location(location), dim_index(dim_index), net_weight(net_weight) {};
 
 void package::display() {
     cout << "Details: " << upc << endl;
     cout << "Tracking#: " << tracking << endl;
-    cout << "Destination: " << location.to << endl;
+    cout << "Destination: " << location.to.first << endl;
     cout << "Origin: " << location.from << endl;
     //cout << "volume: " << product.volume << endl;
 }
@@ -69,7 +73,6 @@ customer::customer() {
     assign_shipping();
     construct_packages();
 };
-
 
 void customer::assign_address() {
     
@@ -82,16 +85,42 @@ void customer::assign_shipping() {
     supreme = (distr(gen) == 1 ? true : false);
 }
 
-size_t customer::package_classifier (vector<size_t> &resort_splice) {
-    
+
+
+void customer::package_handler(vector<size_t> &resort_splice) {
+    if (verbose) cout << "Entered Package Handler" << endl;
     if (resort_splice.size() > 1) {
-        
+        vector<vector<double>> dim_matrix;
+        for (size_t i = 0; i < resort_splice.size(); ++i) {
+             dim_matrix.push_back(order[resort_splice[i]].dimensions);
+        }
     }
     else {
-        
+        if (verbose) cout << "    Determined solo product" << endl;
+        for (size_t i = 0; i < box_types.size(); ++i) {
+            size_t valid = 0;
+            for (size_t j = 0; j < 3; ++j) {
+                if (order[resort_splice[0]].dimensions[j] <= box_types[i].dim[j]) {
+                    ++valid;
+                    if (verbose) cout << "     validated: " << order[resort_splice[0]].dimensions[j] << " <= " << box_types[i].dim[j] << endl;
+                }
+                if (valid == 3) {
+                    for (size_t k = 0; k < box_types.size(); ++k, ++i) {
+                        if (order[resort_splice[0]].weight <= box_types[i].weight) {
+                            if (verbose) cout << "     validated: " << order[resort_splice[0]].weight << " <= " << box_types[i].weight << endl;
+                            if (verbose) cout << "     Selected a package ->" << box_types[i].name << endl;
+                            // sets the
+                            location temp({address, order[resort_splice[0]].location});
+                            // the product index from the list or products, the location, the index of the dimension from the list, the combined pacakge and product weight
+                            // could be removed and grabbed from indices again
+                            queue.push({{order_index[resort_splice[0]]}, temp, i, order[resort_splice[0]].weight + 7});
+                            return;
+                        }
+                    }
+                }
+            }
+        }
     }
-    
-    return 0;
 }
 
 void customer::construct_packages() {
@@ -101,22 +130,27 @@ void customer::construct_packages() {
     uniform_int_distribution<> idistr(0, 1); // generate a uniform dist
     cout << std:: boolalpha;
     cout << "Customer Prime status: " << supreme << endl;
-    if (idistr(gen) == 1) {
+    if (/* DISABLES CODE */ (true)) {
         normal_distribution<> ndist(2, 1); // define the range
         const size_t num_products = ndist(gen);
         // cout << num_products << endl;
-    
+        if (num_products == 0) {
+            if (verbose) cout << "SP no order" << endl;
+            return;
+        }
         // seeds the products into the order
         order.reserve(num_products);
-        uniform_int_distribution<> udistr(0, int(sahara.catalogue.size()) - 1);
+        uniform_int_distribution<> udistr(0, int(catalogue.size()) - 1);
         for (size_t i = 0; i < num_products; ++i) {
-            order.push_back(sahara.catalogue[udistr(gen)]);
-            cout << sahara.catalogue[udistr(gen)].name << endl;
+            size_t prod = udistr(gen);
+            order.push_back(catalogue[prod]);
+            order_index.push_back(prod);
+            history.push_back(prod);
+            cout << catalogue[prod].name << endl;
         }
         // sorts the product in an order
         sort(begin(order), end(order), compare());
         vector<vector<size_t>> resort;
-        
         
         // will not ship two of the same products in a single package!!!
         vector<size_t>temp;
@@ -132,12 +166,10 @@ void customer::construct_packages() {
             }
         }
         resort.push_back(temp);
-        for (int i = 0; i < resort.size(); ++i) {
-            for (int j = 0; j < resort[i].size(); ++j) {
-                cout << resort[i][j] << " ";
-            }
-            cout << endl;
-        }
+        // determines how to package the items
+        for (int i = 0; i < resort.size(); ++i) package_handler(resort[i]);
     }
-    else cout << "No Order" << endl;
+    else {
+        if (verbose) cout << "No Order" << endl;
+    }
 }

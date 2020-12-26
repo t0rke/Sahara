@@ -16,7 +16,12 @@ int main(int argc, const char * argv[]) {
     //std::uniform_int_distribution<> distr(6, 27); // define the range
     
     // name and then UPC(length|width|height|weight)
-    customer temp;
+    
+   
+    //customer temp;
+    for (int i = 0; i < 20; ++i) customer temp;
+    
+    // need to add random customer generation right adter
 
     // insert chode here...
     
@@ -27,6 +32,16 @@ int main(int argc, const char * argv[]) {
  
  Dec 21st -
     Began hashing UPC for vendor products
+ Dec 22nd - completed product spec hasing
+ Dec 25th - complete single parcel to package conversion
+ 
+ 
+ 
+ TODO: implement multiple conversions
+ TODO: implement random customer generation
+ TODO: determine how to do location tracking for customers
+ TODO: determine how to estimate and handle 1000 packages at once with customers unique identifier;
+ 
  
  
  */
