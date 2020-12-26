@@ -17,7 +17,7 @@ struct compare {
 };
 
 
-double verbose = true;
+double verbose = false;
 
 //////////////////////////////////////////PRODUCT FUNCTIONS//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // determines and assigns product specs (lWH) from hash int
@@ -37,9 +37,9 @@ product::product(const string name, const uint64_t hash, size_t location) : name
     dimensions[0] = t_lar / 100.0;
     dimensions[1] = t_mid / 100.0;
     dimensions[2] = t_sma / 100.0;
-    weight /= 100.0;
+    weight /= 10.0;
     volume = dimensions[0] * dimensions[1] * dimensions[2];
-    // cout << name + ": "<< dimensions[0] << " " << dimensions[1] << " "  << dimensions[2] << " " << weight << " [" << volume << "]" << endl;
+    cout << name + ": "<< dimensions[0] << " " << dimensions[1] << " "  << dimensions[2] << " " << weight << " [" << volume << "]" << endl;
 }
 // prints the relevant product information
 void product::info() {
@@ -69,23 +69,26 @@ void package::display() {
 
 //////////////////////////////////////////CUSTOMER FUNCTIONS///////////////////////////////////////////////////////////////////////////////////////////////////////
 customer::customer() {
+    generate_profile();
     assign_address();
     assign_shipping();
     construct_packages();
 };
 
-void customer::assign_address() {
+void customer::generate_profile() {
     
 }
 
+void customer::assign_address() {
+    
+}
+// assigns the shipping priority
 void customer::assign_shipping() {
     random_device rd; // obtain a random number from hardware
     mt19937 gen(rd()); // seed the generator
     uniform_int_distribution<> distr(0, 1); // uniform int distribution
     supreme = (distr(gen) == 1 ? true : false);
 }
-
-
 
 void customer::package_handler(vector<size_t> &resort_splice) {
     if (verbose) cout << "Entered Package Handler" << endl;
@@ -129,8 +132,8 @@ void customer::construct_packages() {
     mt19937 gen(rd()); // seed the generator
     uniform_int_distribution<> idistr(0, 1); // generate a uniform dist
     cout << std:: boolalpha;
-    cout << "Customer Prime status: " << supreme << endl;
-    if (/* DISABLES CODE */ (true)) {
+    // cout << "Customer Prime status: " << supreme << endl;
+    if (/* idistr(gen) == 1 */ (true)) {
         normal_distribution<> ndist(2, 1); // define the range
         const size_t num_products = ndist(gen);
         // cout << num_products << endl;

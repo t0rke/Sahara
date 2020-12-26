@@ -107,7 +107,8 @@ const std::vector<product> catalogue {
  };
 
 class sahara {
-    
+public:
+    std::priority_queue<package> order_priority;
     void generate_customer_accounts() {
         
     }
@@ -143,6 +144,7 @@ public:
     std::vector<product> order;
     std::queue<package> queue;
     
+    
     customer();
          
     // will give and X and Y coordinate of the shipping address
@@ -152,6 +154,8 @@ public:
     void assign_shipping();
     
     void construct_packages();
+    
+    void generate_profile();
     
     void package_handler(std::vector<size_t> &resort_splice);
     
