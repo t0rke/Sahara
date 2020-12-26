@@ -11,6 +11,22 @@
 
 using namespace std;
 ///////////////////////////////////////////GEN FUNCTIONS/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+vector<string> generate_list(string list_name) {
+    string name;
+    vector<string> names_list;
+    ifstream file(list_name);
+    if (file.fail()) cout << "couldnt open file" << endl;
+    names_list.reserve(2500);
+    while (getline(file, name)) names_list.push_back(name);
+    return names_list;
+}
+
+// holds the FIRST and LAST names
+const std::vector<std::string> first_names = generate_list("Fnames.txt"),
+    last_names = generate_list("Fnames.txt");
+
+
+
 struct compare {
     inline bool operator() (const product &product1, const product &product2){
         return product1.location < product2.location;
@@ -18,12 +34,10 @@ struct compare {
 };
 
 
-double verbose = false;
+double verbose = true;
 
 //////////////////////////////////////////PRODUCT FUNCTIONS//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // determines and assigns product specs (lWH) from hash int
-
-
 product::product(const string name, const uint64_t hash, size_t location) : name(name), hash(hash), location(location) {
     weight = hash % 10000;
     const size_t height = ((hash % 100000000) - weight) / 10000;
@@ -40,7 +54,6 @@ product::product(const string name, const uint64_t hash, size_t location) : name
     dimensions[2] = t_sma / 100.0;
     weight /= 10.0;
     volume = dimensions[0] * dimensions[1] * dimensions[2];
-    cout << name + ": "<< dimensions[0] << " " << dimensions[1] << " "  << dimensions[2] << " " << weight << " [" << volume << "]" << endl;
 }
 // prints the relevant product information
 void product::info() {
@@ -77,24 +90,10 @@ customer::customer() {
 };
 
 void customer::generate_profile() {
-    std::ifstream file;
-	file.open("Lnames.txt", ios::in);
-	vector <string> names;
-	string name;
-	names.reserve(62644);
-	int i = 0;
-	while (getline(file, name)) {
-
-		getline(file, name);
-		names.push_back(name);
-		if (i % 14 == 0) {
-			cout << name << endl;
-		}
-		else {
-
-		}
-		i++;
-	}
+    random_device rd; // obtain a random number from hardware
+    mt19937 gen(rd()); // seed the generator
+    uniform_int_distribution<> distr(0, 2249);
+    name = first_names[distr(gen)] + " " + last_names[distr(gen)];
 }
 
 void customer::assign_address() {
@@ -109,7 +108,7 @@ void customer::assign_shipping() {
 }
 
 void customer::package_handler(vector<size_t> &resort_splice) {
-    if (verbose) cout << "Entered Package Handler" << endl;
+    if (verbose) cout << "  Entered Package Handler" << endl;
     if (resort_splice.size() > 1) {
         vector<vector<double>> dim_matrix;
         for (size_t i = 0; i < resort_splice.size(); ++i) {
@@ -117,19 +116,19 @@ void customer::package_handler(vector<size_t> &resort_splice) {
         }
     }
     else {
-        if (verbose) cout << "    Determined solo product" << endl;
+        if (verbose) cout << "      Determined solo product" << endl;
         for (size_t i = 0; i < box_types.size(); ++i) {
             size_t valid = 0;
             for (size_t j = 0; j < 3; ++j) {
                 if (order[resort_splice[0]].dimensions[j] <= box_types[i].dim[j]) {
                     ++valid;
-                    if (verbose) cout << "     validated: " << order[resort_splice[0]].dimensions[j] << " <= " << box_types[i].dim[j] << endl;
+                    if (verbose) cout << "       validated: " << order[resort_splice[0]].dimensions[j] << " <= " << box_types[i].dim[j] << endl;
                 }
                 if (valid == 3) {
                     for (size_t k = 0; k < box_types.size(); ++k, ++i) {
                         if (order[resort_splice[0]].weight <= box_types[i].weight) {
-                            if (verbose) cout << "     validated: " << order[resort_splice[0]].weight << " <= " << box_types[i].weight << endl;
-                            if (verbose) cout << "     Selected a package ->" << box_types[i].name << endl;
+                            if (verbose) cout << "       validated: " << order[resort_splice[0]].weight << " <= " << box_types[i].weight << endl;
+                            if (verbose) cout << "       Selected a package ->" << box_types[i].name << endl;
                             // sets the
                             location temp({address, order[resort_splice[0]].location});
                             // the product index from the list or products, the location, the index of the dimension from the list, the combined pacakge and product weight
@@ -156,7 +155,7 @@ void customer::construct_packages() {
         const size_t num_products = ndist(gen);
         // cout << num_products << endl;
         if (num_products == 0) {
-            if (verbose) cout << "SP no order" << endl;
+            if (verbose) cout << ">No Order" << endl;
             return;
         }
         // seeds the products into the order
@@ -194,3 +193,14 @@ void customer::construct_packages() {
         if (verbose) cout << "No Order" << endl;
     }
 }
+
+//////////////////////////////////////////SAHARA FUNCTIONS///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+void sahara::initialize_supporting_materials() {
+    // initializes the names lists
+//    generate_list(first_names, "fname.txt");
+//    generate_list(last_names, "lname.txt");
+
+}
+

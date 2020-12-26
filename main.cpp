@@ -17,7 +17,8 @@ int main(int argc, const char * argv[]) {
     
     // name and then UPC(length|width|height|weight)
     
-   
+
+    sahara sahara;
     //customer temp;
     for (int i = 0; i < 20; ++i) customer temp;
     

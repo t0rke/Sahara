@@ -106,9 +106,15 @@ const std::vector<product> catalogue {
      {"AirPods Pro ",                10239017800850017, 71736},
  };
 
+
 class sahara {
 public:
+    
+    
     std::priority_queue<package> order_priority;
+    
+    void initialize_supporting_materials();
+    
     void generate_customer_accounts() {
         
     }
