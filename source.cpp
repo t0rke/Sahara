@@ -10,6 +10,7 @@
 #include <fstream>
 
 using namespace std;
+
 ///////////////////////////////////////////GEN FUNCTIONS/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 vector<string> generate_list(string list_name) {
     string name;
@@ -34,7 +35,7 @@ struct compare {
 };
 
 
-double verbose = true;
+const double VERBOSE = false;
 
 //////////////////////////////////////////PRODUCT FUNCTIONS//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // determines and assigns product specs (lWH) from hash int
@@ -92,11 +93,18 @@ customer::customer() {
 void customer::generate_profile() {
     random_device rd; // obtain a random number from hardware
     mt19937 gen(rd()); // seed the generator
-    uniform_int_distribution<> distr(0, 2249);
+    uniform_int_distribution<> distr(0, 2248);
     name = first_names[distr(gen)] + " " + last_names[distr(gen)];
 }
 
 void customer::assign_address() {
+    random_device rd; // obtain a random number from hardware
+    mt19937 gen(rd()); // seed the generator
+    uniform_int_distribution<> adistr(-3500, 2000); //
+    uniform_int_distribution<> bdistr(-20000, 1500); //
+    
+    address = {adistr(gen), bdistr(gen)};
+    
     
 }
 // assigns the shipping priority
@@ -108,27 +116,28 @@ void customer::assign_shipping() {
 }
 
 void customer::package_handler(vector<size_t> &resort_splice) {
-    if (verbose) cout << "  Entered Package Handler" << endl;
+    if (VERBOSE) cout << "  Entered Package Handler" << endl;
     if (resort_splice.size() > 1) {
+        if (VERBOSE) cout << "      Detected multiple products" << endl;
         vector<vector<double>> dim_matrix;
         for (size_t i = 0; i < resort_splice.size(); ++i) {
              dim_matrix.push_back(order[resort_splice[i]].dimensions);
         }
     }
     else {
-        if (verbose) cout << "      Determined solo product" << endl;
+        if (VERBOSE) cout << "      Detected solo product" << endl;
         for (size_t i = 0; i < box_types.size(); ++i) {
             size_t valid = 0;
             for (size_t j = 0; j < 3; ++j) {
                 if (order[resort_splice[0]].dimensions[j] <= box_types[i].dim[j]) {
                     ++valid;
-                    if (verbose) cout << "       validated: " << order[resort_splice[0]].dimensions[j] << " <= " << box_types[i].dim[j] << endl;
+                    if (VERBOSE) cout << "       validated: " << order[resort_splice[0]].dimensions[j] << " <= " << box_types[i].dim[j] << endl;
                 }
                 if (valid == 3) {
                     for (size_t k = 0; k < box_types.size(); ++k, ++i) {
                         if (order[resort_splice[0]].weight <= box_types[i].weight) {
-                            if (verbose) cout << "       validated: " << order[resort_splice[0]].weight << " <= " << box_types[i].weight << endl;
-                            if (verbose) cout << "       Selected a package ->" << box_types[i].name << endl;
+                            if (VERBOSE) cout << "       validated: " << order[resort_splice[0]].weight << " <= " << box_types[i].weight << endl;
+                            if (VERBOSE) cout << "       Selected a package ->" << box_types[i].name << endl;
                             // sets the
                             location temp({address, order[resort_splice[0]].location});
                             // the product index from the list or products, the location, the index of the dimension from the list, the combined pacakge and product weight
@@ -147,26 +156,27 @@ void customer::construct_packages() {
     order.clear();
     random_device rd; // obtain a random number from hardware
     mt19937 gen(rd()); // seed the generator
-    uniform_int_distribution<> idistr(0, 1); // generate a uniform dist
+    uniform_int_distribution<> idistr(0, 20); // generate a uniform dist
     cout << std:: boolalpha;
     // cout << "Customer Prime status: " << supreme << endl;
-    if (/* idistr(gen) == 1 */ (true)) {
-        normal_distribution<> ndist(2, 1); // define the range
-        const size_t num_products = ndist(gen);
-        // cout << num_products << endl;
+    if (idistr(gen) == 1) {
+        normal_distribution<double> distr(2, 1); // define the range  // HAVING ISSUES WITH NDIST
+        uint32_t num_products = distr(gen);
+        if (num_products > 9) num_products = 0;
         if (num_products == 0) {
-            if (verbose) cout << ">No Order" << endl;
+            if (VERBOSE) cout << ">No Order" << endl;
             return;
         }
         // seeds the products into the order
         order.reserve(num_products);
         uniform_int_distribution<> udistr(0, int(catalogue.size()) - 1);
+        if (VERBOSE) cout << "[" + name + "]" << endl;
         for (size_t i = 0; i < num_products; ++i) {
             size_t prod = udistr(gen);
             order.push_back(catalogue[prod]);
             order_index.push_back(prod);
             history.push_back(prod);
-            cout << catalogue[prod].name << endl;
+            if (VERBOSE) cout << catalogue[prod].name << endl;
         }
         // sorts the product in an order
         sort(begin(order), end(order), compare());
@@ -190,8 +200,12 @@ void customer::construct_packages() {
         for (int i = 0; i < resort.size(); ++i) package_handler(resort[i]);
     }
     else {
-        if (verbose) cout << "No Order" << endl;
+        if (VERBOSE) cout << "No Order" << endl;
     }
+}
+
+void customer::display(size_t i) {
+    cout << "#" << i << " [" + name + "] (" << address.first << ", " << address.second << ") SPM->" << supreme << " CORD: " << order.size() << endl;
 }
 
 //////////////////////////////////////////SAHARA FUNCTIONS///////////////////////////////////////////////////////////////////////////////////////////////////////
