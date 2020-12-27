@@ -156,7 +156,7 @@ void customer::construct_packages() {
     order.clear();
     random_device rd; // obtain a random number from hardware
     mt19937 gen(rd()); // seed the generator
-    uniform_int_distribution<> idistr(0, 20); // generate a uniform dist
+    uniform_int_distribution<> idistr(0, 100); // generate a uniform dist
     cout << std:: boolalpha;
     // cout << "Customer Prime status: " << supreme << endl;
     if (idistr(gen) == 1) {
