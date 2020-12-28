@@ -26,16 +26,13 @@ vector<string> generate_list(string list_name) {
 const std::vector<std::string> first_names = generate_list("Fnames.txt"),
     last_names = generate_list("Fnames.txt");
 
-
-
 struct compare {
     inline bool operator() (const product &product1, const product &product2){
         return product1.location < product2.location;
     }
 };
 
-
-const double VERBOSE = false;
+const double VERBOSE = true;
 
 //////////////////////////////////////////PRODUCT FUNCTIONS//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // determines and assigns product specs (lWH) from hash int
@@ -55,6 +52,8 @@ product::product(const string name, const uint64_t hash, size_t location) : name
     dimensions[2] = t_sma / 100.0;
     weight /= 10.0;
     volume = dimensions[0] * dimensions[1] * dimensions[2];
+    
+    cout << name << " " << dimensions[0] << " " << dimensions[1] << " " << dimensions[2] << " " << weight << endl;
 }
 // prints the relevant product information
 void product::info() {
@@ -115,13 +114,47 @@ void customer::assign_shipping() {
     supreme = (distr(gen) == 1 ? true : false);
 }
 
+// TODO: implement more combinations of this to make sure the correct item was picked
+bool customer::product_configurations(vector<vector<double>> &dim_matrix, size_t i) {
+    vector<double>local_dims(3);
+    // if dim_matrix has a size of 2
+    if (dim_matrix.size() == 2) {
+        cout << "       Detected A set of 2" << endl;
+        local_dims.push_back(dim_matrix[0][0] + dim_matrix[1][1]);
+        local_dims.push_back(dim_matrix[0][1] + dim_matrix[1][2]);
+        local_dims.push_back(dim_matrix[0][2] + dim_matrix[1][0]);
+    }
+    sort(rbegin(local_dims), rend(local_dims));
+    size_t valid = 0;
+    for( size_t j = 0; j < 3; ++j) {
+        if (local_dims[j] <= box_types[i].dim[j]) {
+            ++valid;
+            if (VERBOSE) cout << "       validated: " << local_dims[j] << " <= " << box_types[i].dim[j] << endl;
+        }
+        if (valid == 3) return true;
+    }
+    return false;
+}
+
 void customer::package_handler(vector<size_t> &resort_splice) {
     if (VERBOSE) cout << "  Entered Package Handler" << endl;
     if (resort_splice.size() > 1) {
         if (VERBOSE) cout << "      Detected multiple products" << endl;
         vector<vector<double>> dim_matrix;
+        double net_weight = 0;
         for (size_t i = 0; i < resort_splice.size(); ++i) {
-             dim_matrix.push_back(order[resort_splice[i]].dimensions);
+            dim_matrix.push_back(order[resort_splice[i]].dimensions);
+            net_weight += order[resort_splice[i]].weight;
+        }
+        for (size_t i = 0; i < box_types.size(); ++i) {
+            if (net_weight <= box_types[i].weight) {
+                cout << "    Matched weight" << endl;
+                if (product_configurations(dim_matrix, i)) {
+                    location temp({address, order[resort_splice[0]].location});
+                    queue.push({{order_index[resort_splice[0]]}, temp, i, order[resort_splice[0]].weight + 7});
+                    break;
+                }
+            }
         }
     }
     else {
@@ -205,7 +238,8 @@ void customer::construct_packages() {
 }
 
 void customer::display(size_t i) {
-    cout << "#" << i << " [" + name + "] (" << address.first << ", " << address.second << ") SPM->" << supreme << " CORD: " << order.size() << endl;
+    cout << "#" << i << " [" + name + "] (" << address.first << ", " << address.second
+        << ") SPM->" << supreme << " CORD: " << order.size() << endl;
 }
 
 //////////////////////////////////////////SAHARA FUNCTIONS///////////////////////////////////////////////////////////////////////////////////////////////////////

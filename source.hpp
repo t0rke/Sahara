@@ -110,7 +110,7 @@ const std::vector<product> catalogue {
      {"Mac Mini ",			            10140077007700416, 51031},
      {"iPod Touch",			            10231048600240031, 51031},
      {"HomePod ",			            10680056005600880, 51031},
-     {"HomePod mini",			        10330039003901216, 51031},
+     {"HomePod mini",			        10330039003900122, 51031},
      {"Apple Watch SE (40m)",		    10158013400430011, 51031},
      {"Apple Watch SE (44m)",		    10174015000430013, 51031},
      {"iPhone SE",			            10545026500290053, 51031},
@@ -176,6 +176,8 @@ public:
     void package_handler(std::vector<size_t> &resort_splice);
     
     void display(size_t i);
+    
+    bool product_configurations(std::vector<std::vector<double>> &dim_matrix, size_t i);
     
     
     

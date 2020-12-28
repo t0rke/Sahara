@@ -23,14 +23,15 @@ int main(int argc, const char * argv[]) {
     int hello = 0;
     vector<customer> custs;
     custs.reserve(100000);
-    for (int i = 0; i < 100000; ++i) {
-        //cout << "----------------------------------------\n";
-        //cout << "#" << i << endl;
+    customer temp;
+    for (int i = 0; i < 1000; ++i) {
+        cout << "----------------------------------------\n";
+        cout << "#" << i << endl;
         customer temp;
-        custs.push_back(temp);
-        temp.display(i);
+        //custs.push_back(temp)
+        //temp.display(i);
         hello += temp.order.size();
-        
+
     }
     cout << hello << endl;
     
