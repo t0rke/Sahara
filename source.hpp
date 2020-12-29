@@ -59,10 +59,11 @@ public:
     size_t urgency;
     size_t dim_index;
     double net_weight;
+    double price;
     std::vector<size_t> product_indices;
     location location;
     
-    package(std::vector<size_t> indices, class location &location, size_t dim_index, double net_weight);
+    package(std::vector<size_t> indices, class location &location, size_t dim_index, double net_weight, double price);
     
     void display();
     
@@ -85,8 +86,7 @@ const std::vector<parcel> box_types {
     {"LS3", 28, 4.90, large_standard},
     {"LS4", 44, 5.42, large_standard},
     {"LS5", 332, 5.42, large_standard},
-    {"SO", 1132, 8.26, small_oversize},
-};
+    {"SO", 1132, 8.26, small_oversize}};
 
 const std::vector<product> catalogue {
      {"iPhone XR",                      10594029800330069, 48336},

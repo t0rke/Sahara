@@ -70,8 +70,8 @@ location::location(pair<int,int> address, size_t from) : to(address), from (from
 
 
 //////////////////////////////////////////PACKAGE FUNCTIONS////////////////////////////////////////////////////////////////////////////////////////////////////////////
-package::package(vector<size_t> indices, class location &location, size_t dim_index, double net_weight) :
-    product_indices(indices), location(location), dim_index(dim_index), net_weight(net_weight) {};
+package::package(vector<size_t> indices, class location &location, size_t dim_index, double net_weight, double price) :
+    product_indices(indices), location(location), dim_index(dim_index), net_weight(net_weight), price(price) {};
 
 void package::display() {
     cout << "Details: " << upc << endl;
@@ -101,10 +101,7 @@ void customer::assign_address() {
     mt19937 gen(rd()); // seed the generator
     uniform_int_distribution<> adistr(-3500, 2000); //
     uniform_int_distribution<> bdistr(-20000, 1500); //
-    
     address = {adistr(gen), bdistr(gen)};
-    
-    
 }
 // assigns the shipping priority
 void customer::assign_shipping() {
@@ -116,20 +113,32 @@ void customer::assign_shipping() {
 
 // TODO: implement more combinations of this to make sure the correct item was picked
 bool customer::product_configurations(vector<vector<double>> &dim_matrix, size_t i) {
-    vector<double>local_dims(3);
-    // if dim_matrix has a size of 2
+    vector<double>local_dims;
+    local_dims.reserve(3);
     if (dim_matrix.size() == 2) {
         cout << "       Detected A set of 2" << endl;
-        local_dims.push_back(dim_matrix[0][0] + dim_matrix[1][1]);
-        local_dims.push_back(dim_matrix[0][1] + dim_matrix[1][2]);
-        local_dims.push_back(dim_matrix[0][2] + dim_matrix[1][0]);
+        local_dims.push_back(dim_matrix[0][0] + dim_matrix[1][0]);
+        local_dims.push_back(dim_matrix[0][1] + dim_matrix[1][1]);
+        local_dims.push_back(dim_matrix[0][2] + dim_matrix[1][2]);
+    }
+    if (dim_matrix.size() == 3) {
+        cout << "       Detected A set of 3" << endl;
+        local_dims.push_back(dim_matrix[0][0] + dim_matrix[1][0] + dim_matrix[2][1]);
+        local_dims.push_back(dim_matrix[0][1] + dim_matrix[1][1] + dim_matrix[2][2]);
+        local_dims.push_back(dim_matrix[0][2] + dim_matrix[1][2] + dim_matrix[2][0]);
+    }
+    if (dim_matrix.size() == 4) {
+        cout << "       Detected A set of 4" << endl;
+        local_dims.push_back(dim_matrix[0][0] + dim_matrix[1][0] + dim_matrix[2][0] + dim_matrix[3][1]);
+        local_dims.push_back(dim_matrix[0][1] + dim_matrix[1][1] + dim_matrix[2][1] + dim_matrix[3][2]);
+        local_dims.push_back(dim_matrix[0][2] + dim_matrix[1][2] + dim_matrix[2][2] + dim_matrix[3][0]);
     }
     sort(rbegin(local_dims), rend(local_dims));
     size_t valid = 0;
-    for( size_t j = 0; j < 3; ++j) {
+    for(size_t j = 0; j < 3; ++j) {
         if (local_dims[j] <= box_types[i].dim[j]) {
-            ++valid;
             if (VERBOSE) cout << "       validated: " << local_dims[j] << " <= " << box_types[i].dim[j] << endl;
+            ++valid;
         }
         if (valid == 3) return true;
     }
@@ -148,10 +157,19 @@ void customer::package_handler(vector<size_t> &resort_splice) {
         }
         for (size_t i = 0; i < box_types.size(); ++i) {
             if (net_weight <= box_types[i].weight) {
-                cout << "    Matched weight" << endl;
+                if (VERBOSE) cout << "       matched: " << net_weight << " <= " << box_types[i].weight << endl;
                 if (product_configurations(dim_matrix, i)) {
+                    if (VERBOSE) cout << "       Selected a package ->" << box_types[i].name << endl;
+                    double price = box_types[i].price;
+                    if (box_types[i].name == "LS5" || box_types[i].name == "SO") {
+                        double diff = 0.0;
+                        if (box_types[i].name == "LS5") diff = net_weight - 32;
+                        else diff = net_weight - 48;
+                        price = box_types[i].price + (ceil(diff / 16.0) * 0.38);
+                        cout << "       Calculated Price: " << price << endl;
+                    }
                     location temp({address, order[resort_splice[0]].location});
-                    queue.push({{order_index[resort_splice[0]]}, temp, i, order[resort_splice[0]].weight + 7});
+                    queue.push({{order_index[resort_splice[0]]}, temp, i, order[resort_splice[0]].weight + 7, price});
                     break;
                 }
             }
@@ -163,19 +181,26 @@ void customer::package_handler(vector<size_t> &resort_splice) {
             size_t valid = 0;
             for (size_t j = 0; j < 3; ++j) {
                 if (order[resort_splice[0]].dimensions[j] <= box_types[i].dim[j]) {
-                    ++valid;
                     if (VERBOSE) cout << "       validated: " << order[resort_splice[0]].dimensions[j] << " <= " << box_types[i].dim[j] << endl;
+                    ++valid;
                 }
                 if (valid == 3) {
                     for (size_t k = 0; k < box_types.size(); ++k, ++i) {
                         if (order[resort_splice[0]].weight <= box_types[i].weight) {
                             if (VERBOSE) cout << "       validated: " << order[resort_splice[0]].weight << " <= " << box_types[i].weight << endl;
                             if (VERBOSE) cout << "       Selected a package ->" << box_types[i].name << endl;
-                            // sets the
+                            double price = order[resort_splice[0]].weight;
+                            if (box_types[i].name == "LS5" || box_types[i].name == "SO") {
+                                double diff = 0.0;
+                                if (box_types[i].name == "LS5") diff = box_types[i].weight - 32;
+                                else diff = box_types[i].weight - 48;
+                                price = box_types[i].price + (ceil(diff / 16.0) * 0.38);
+                                cout << "       Calculated Price: " << price << endl;
+                            }
                             location temp({address, order[resort_splice[0]].location});
                             // the product index from the list or products, the location, the index of the dimension from the list, the combined pacakge and product weight
                             // could be removed and grabbed from indices again
-                            queue.push({{order_index[resort_splice[0]]}, temp, i, order[resort_splice[0]].weight + 7});
+                            queue.push({{order_index[resort_splice[0]]}, temp, i, order[resort_splice[0]].weight + 7, price});
                             return;
                         }
                     }
@@ -219,9 +244,7 @@ void customer::construct_packages() {
         vector<size_t>temp;
         temp.push_back(0);
         for (size_t i = 1; i < order.size(); ++i) {
-            if (order[i - 1].location == order[i].location) {
-                temp.push_back(i);
-            }
+            if (order[i - 1].location == order[i].location) temp.push_back(i);
             else {
                 resort.push_back(temp);
                 temp.clear();
@@ -232,9 +255,7 @@ void customer::construct_packages() {
         // determines how to package the items
         for (int i = 0; i < resort.size(); ++i) package_handler(resort[i]);
     }
-    else {
-        if (VERBOSE) cout << "No Order" << endl;
-    }
+    else { if (VERBOSE) cout << "No Order" << endl; }
 }
 
 void customer::display(size_t i) {

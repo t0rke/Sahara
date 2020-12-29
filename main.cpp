@@ -48,13 +48,15 @@ int main(int argc, const char * argv[]) {
     Began hashing UPC for vendor products
  Dec 22nd - completed product spec hasing
  Dec 25th - complete single parcel to package conversion
+ Dec 27th - rebalanced number of packages being ordered per day
+ Dec 29th - completed multiple package implementation, with cost per package shipping
  
  
  
- TODO: implement multiple conversions
- TODO: implement random customer generation
  TODO: determine how to do location tracking for customers
  TODO: determine how to estimate and handle 1000 packages at once with customers unique identifier;
+ 
+ 
  
  
  
