@@ -149,6 +149,7 @@ class customer {
 public:
     // shipping priority
     bool supreme;
+    size_t reorder_count = 0;
     // coordinate pairs
     std::pair<int, int> address;
     std::string name;
@@ -169,7 +170,9 @@ public:
     // will determine the aproximate shippint i.e plane, truck etc. and provide an estimated time of shipping.
     void assign_shipping();
     
-    void construct_packages();
+    void construct_order();
+    
+    void reorder();
     
     void generate_profile();
     

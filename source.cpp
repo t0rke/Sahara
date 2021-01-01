@@ -53,7 +53,7 @@ product::product(const string name, const uint64_t hash, size_t location) : name
     weight /= 10.0;
     volume = dimensions[0] * dimensions[1] * dimensions[2];
     
-    cout << name << " " << dimensions[0] << " " << dimensions[1] << " " << dimensions[2] << " " << weight << endl;
+    //cout << name << " " << dimensions[0] << " " << dimensions[1] << " " << dimensions[2] << " " << weight << endl;
 }
 // prints the relevant product information
 void product::info() {
@@ -86,7 +86,7 @@ customer::customer() {
     generate_profile();
     assign_address();
     assign_shipping();
-    construct_packages();
+    construct_order();
 };
 
 void customer::generate_profile() {
@@ -210,7 +210,7 @@ void customer::package_handler(vector<size_t> &resort_splice) {
     }
 }
 
-void customer::construct_packages() {
+void customer::construct_order() {
     order.clear();
     random_device rd; // obtain a random number from hardware
     mt19937 gen(rd()); // seed the generator
@@ -258,9 +258,14 @@ void customer::construct_packages() {
     else { if (VERBOSE) cout << "No Order" << endl; }
 }
 
+void customer::reorder() {
+    ++reorder_count;
+    construct_order();
+}
+
 void customer::display(size_t i) {
     cout << "#" << i << " [" + name + "] (" << address.first << ", " << address.second
-        << ") SPM->" << supreme << " CORD: " << order.size() << endl;
+        << ") SPM->" << supreme << " CORD: " << order.size() << " HIST: " << history.size() << " Rord: " << reorder_count << endl;
 }
 
 //////////////////////////////////////////SAHARA FUNCTIONS///////////////////////////////////////////////////////////////////////////////////////////////////////

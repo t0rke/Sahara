@@ -17,28 +17,44 @@ int main(int argc, const char * argv[]) {
     
     // name and then UPC(length|width|height|weight)
     
+    random_device rd; // obtain a random number from hardware
+    mt19937 gen(rd()); // seed the generator
+    uniform_int_distribution<> idistr(0, 100); // generate a uniform dist
+    
 
     sahara sahara;
     //customer temp;
     int hello = 0;
     vector<customer> custs;
-    custs.reserve(100000);
+    custs.reserve(1000);
     customer temp;
     for (int i = 0; i < 1000; ++i) {
-        cout << "----------------------------------------\n";
-        cout << "#" << i << endl;
+        //cout << "----------------------------------------\n";
+        //cout << "#" << i << endl;
         customer temp;
+        custs.push_back(temp);
         //custs.push_back(temp)
         //temp.display(i);
         hello += temp.order.size();
-
     }
     cout << hello << endl;
+    for (int i = 0; i < 1000; ++i) {
+        
+        size_t cust_index =  idistr(gen);
+        custs[cust_index].reorder();
+        hello += custs[cust_index].order.size();
+        cout << "customer: " << cust_index << " has been chosen -> ";
+    }
+    cout << endl;
+    cout << hello << endl;
+    for (int i = 0; i < 1000; ++i) {
+        custs[i].display(i);
+    }
     
+      
     // need to add random customer generation right adter
 
-    // insert chode here...
-    
+   
 }
 
 
@@ -50,6 +66,7 @@ int main(int argc, const char * argv[]) {
  Dec 25th - complete single parcel to package conversion
  Dec 27th - rebalanced number of packages being ordered per day
  Dec 29th - completed multiple package implementation, with cost per package shipping
+ Dec 31st -
  
  
  
