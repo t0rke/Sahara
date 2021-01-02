@@ -13,6 +13,45 @@
 #include <vector>
 #include <queue>
 #include <random>
+#include <iomanip>
+
+class time {
+    size_t curr_year = 2021;
+    size_t curr_month = 0;
+    size_t curr_date = 0;
+    std::vector<std::pair<std::string, int>> months {
+        {"JAN", 31}, {"FEB", 28}, {"MAR", 31}, {"APR", 30},
+        {"MAY", 31}, {"JUN", 30}, {"JUL", 31}, {"AUG", 31},
+        {"SEP", 30}, {"OCT", 31}, {"NOV", 30}, {"DEC", 31}};
+    
+public:
+    void display() {
+        std::cout << months[curr_month].first << "/" << std::setw(2) << std::setfill('0') << curr_date + 1 << "/" << curr_year << std::endl;
+        next();
+    }
+    
+    void next() {
+        if (curr_date + 1 < months[curr_month].second) {
+            ++curr_date;
+        }
+        else {
+            ++curr_month;
+            curr_date = 0;
+            if (curr_month > 11) {
+                ++curr_year;
+                handle_leap();
+                curr_month = 0;
+                curr_date = 0;
+            }
+        }
+    }
+    
+    void handle_leap() {
+        if (curr_year % 4 == 0 && curr_year % 100 != 0) months[1] = {"FEB", 29};
+        else months[1] = {"FEB", 28};
+    }
+    
+};
 
 // length width and height are grabbed from hashing the tracking number
 // the UPC will be LLLLBBBBHHHHWWWWPP..
@@ -24,10 +63,10 @@ public:
     uint64_t hash;
     std::string name;
     std::vector<double> dimensions;
-    double price;
+    double price = 0;
     double weight, volume;
 
-    product(const std::string name, const uint64_t hash, const size_t location);
+    product(const std::string name, const uint64_t hash, const size_t location, double price);
   
     void info();
     //product (string name, double price, double length, double width, double height, double weight) :
@@ -88,60 +127,35 @@ const std::vector<parcel> box_types {
     {"LS5", 332, 5.42, large_standard},
     {"SO", 1132, 8.26, small_oversize}};
 
+
 const std::vector<product> catalogue {
-     {"iPhone XR",                      10594029800330069, 48336},
-     {"iPhone X",                       10060102504500062, 48336},
-     {"iPad Pro",                       10950073200380230, 48168},
-     {"iPad Air",                       10974070000240160, 48168},
-     {"iPad",                           10980068000290175, 48168},
-     {"iPad Mini",                      10800053000240106, 48168},
-     {"iPhone 12 Pro",                  10578028200290067, 51031},
-     {"iPhone 12 Pro Max",              10633030700290081, 51031},
-     {"iPhone 12 mini",                 10518025300290048, 51031},
-     {"iPhone 12",                      10578028200290058, 51031},
-     {"MacBook Air",                    10063119708360045, 71736},
-     {"MacBook Pro",                    10061119708360480, 71736},
-     {"Apple Watch Series 6 (44m)",     10174015000430017, 51031},
-     {"Apple Watch Series 6 (40m)",     10158013400430015, 51031},
-     {"AirPods Pro ",                   10239017800850017, 71736},
-     {"iMac (21.5 in) ",	           	11770020806901920, 51031},
-     {"iMac (27 in) ",			        12030256008003153, 51031},
-     {"iMac Pro ",			            12030256008003440, 51031},
-     {"Mac Mini ",			            10140077007700416, 51031},
-     {"iPod Touch",			            10231048600240031, 51031},
-     {"HomePod ",			            10680056005600880, 51031},
-     {"HomePod mini",			        10330039003900122, 51031},
-     {"Apple Watch SE (40m)",		    10158013400430011, 51031},
-     {"Apple Watch SE (44m)",		    10174015000430013, 51031},
-     {"iPhone SE",			            10545026500290053, 51031},
- };
+     {"iPhone XR",                      10594029800330069, 48336, 499.00},
+     {"iPhone X",                       10060102504500062, 48336, 999.00},
+     {"iPad Pro",                       10950073200380230, 48168, 799.00},
+     {"iPad Air",                       10974070000240160, 48168, 599.00},
+     {"iPad",                           10980068000290175, 48168, 299.00},
+     {"iPad Mini",                      10800053000240106, 48168, 399.00},
+     {"iPhone 12 Pro",                  10578028200290067, 51031, 999.00},
+     {"iPhone 12 Pro Max",              10633030700290081, 51031, 1099.00},
+     {"iPhone 12 mini",                 10518025300290048, 51031, 729.00},
+     {"iPhone 12",                      10578028200290058, 51031, 829.00},
+     {"MacBook Air (13in)",             10063119708360045, 71736, 999.00},
+     {"MacBook Pro (13in)",             10061119708360480, 71736, 1299.00},
+     {"Apple Watch Series 6 (44m)",     10174015000430017, 51031, 429.00},
+     {"Apple Watch Series 6 (40m)",     10158013400430015, 51031, 399.00},
+     {"AirPods Pro ",                   10239017800850017, 71736, 249.00},
+     {"iMac (21.5 in) ",	           	11770020806901920, 51031, 1099.00},
+     {"iMac (27 in) ",			        12030256008003153, 51031, 1999.00},
+     {"iMac Pro ",			            12030256008003440, 51031, 4999.00},
+     {"Mac Mini ",			            10140077007700416, 51031, 699.00},
+     {"iPod Touch",			            10231048600240031, 51031, 199.00},
+     {"HomePod ",			            10680056005600880, 51031, 299.00},
+     {"HomePod mini",			        10330039003900122, 51031, 99.00},
+     {"Apple Watch SE (40m)",		    10158013400430011, 51031, 309.00},
+     {"Apple Watch SE (44m)",		    10174015000430013, 51031, 309.00},
+     {"iPhone SE",			            10545026500290053, 51031, 549.00}};
 
 
-class sahara {
-public:
-    
-    
-    std::priority_queue<package> order_priority;
-    
-    void initialize_supporting_materials();
-    
-    void generate_customer_accounts() {
-        
-    }
-    
-    void company_monetary() {
-        
-    }
-    
-    void increase_time() {
-        
-    }
-    
-    
-    //const std::vector<int>
-    //constexpr string hello = "hello";
-    
-};
 
 //vector<tuple>sizing_chart();
 
@@ -160,7 +174,7 @@ public:
     std::vector<size_t> order_index;
     std::vector<product> order;
     std::queue<package> queue;
-    
+        
     
     customer();
          
@@ -181,9 +195,45 @@ public:
     void display(size_t i);
     
     bool product_configurations(std::vector<std::vector<double>> &dim_matrix, size_t i);
-    
-    
-    
 };
 
+class sahara {
+public:
+    
+    sahara();
+    
+    class time date;
+    
+    void run_company();
+    
+    void generate_leads();
+    
+    void pursue_leads();
+    
+    size_t add_customers();
+    
+    void display_customers();
+    
+    std::priority_queue<package> order_priority;
+    
+    void initialize_supporting_materials();
+    
+    size_t generate_customer_accounts(size_t scale);
+    
+    void handle_orders();
+    
+    void company_monetary();
+    
+    void increase_time();
+    
+    
+    //const std::vector<int>
+    //constexpr string hello = "hello";
+    
+private:
+    std::vector<customer> clients;
+    std::deque<customer> leads;
+
+    
+};
 #endif /* source_hpp */

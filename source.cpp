@@ -17,14 +17,18 @@ vector<string> generate_list(string list_name) {
     vector<string> names_list;
     ifstream file(list_name);
     if (file.fail()) cout << "couldnt open file" << endl;
-    names_list.reserve(2500);
-    while (getline(file, name)) names_list.push_back(name);
+    names_list.reserve(18250);
+    while (getline(file, name)) {
+        name.erase(std::remove(begin(name), end(name), '\n'), end(name));
+        names_list.push_back(name);
+    }
+    names_list.shrink_to_fit();
     return names_list;
 }
 
 // holds the FIRST and LAST names
 const std::vector<std::string> first_names = generate_list("Fnames.txt"),
-    last_names = generate_list("Fnames.txt");
+    last_names = generate_list("Lnames.txt");
 
 struct compare {
     inline bool operator() (const product &product1, const product &product2){
@@ -32,11 +36,16 @@ struct compare {
     }
 };
 
-const double VERBOSE = true;
+std::vector<size_t> mirror_btypes (box_types.size());
+std::vector<size_t> mirror_catalogue (catalogue.size());
+double net_price = 0.0;
+double net_sales = 0.0;
+const double VERBOSE = false;
 
 //////////////////////////////////////////PRODUCT FUNCTIONS//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // determines and assigns product specs (lWH) from hash int
-product::product(const string name, const uint64_t hash, size_t location) : name(name), hash(hash), location(location) {
+// name and then UPC(length|width|height|weight)
+product::product(const string name, const uint64_t hash, size_t location, double price) : name(name), hash(hash), location(location), price(price) {
     weight = hash % 10000;
     const size_t height = ((hash % 100000000) - weight) / 10000;
     const size_t width = ((hash % 1000000000000) - (height * 10000) - weight) / 100000000;
@@ -92,8 +101,9 @@ customer::customer() {
 void customer::generate_profile() {
     random_device rd; // obtain a random number from hardware
     mt19937 gen(rd()); // seed the generator
-    uniform_int_distribution<> distr(0, 2248);
-    name = first_names[distr(gen)] + " " + last_names[distr(gen)];
+    uniform_int_distribution<> ldistr(0, 2248);
+    uniform_int_distribution<> fdistr(0, 18249);
+    name = first_names[fdistr(gen)] + " " + last_names[ldistr(gen)];
 }
 
 void customer::assign_address() {
@@ -116,19 +126,19 @@ bool customer::product_configurations(vector<vector<double>> &dim_matrix, size_t
     vector<double>local_dims;
     local_dims.reserve(3);
     if (dim_matrix.size() == 2) {
-        cout << "       Detected A set of 2" << endl;
+        if (VERBOSE) cout << "       Detected A set of 2" << endl;
         local_dims.push_back(dim_matrix[0][0] + dim_matrix[1][0]);
         local_dims.push_back(dim_matrix[0][1] + dim_matrix[1][1]);
         local_dims.push_back(dim_matrix[0][2] + dim_matrix[1][2]);
     }
     if (dim_matrix.size() == 3) {
-        cout << "       Detected A set of 3" << endl;
+        if (VERBOSE) cout << "       Detected A set of 3" << endl;
         local_dims.push_back(dim_matrix[0][0] + dim_matrix[1][0] + dim_matrix[2][1]);
         local_dims.push_back(dim_matrix[0][1] + dim_matrix[1][1] + dim_matrix[2][2]);
         local_dims.push_back(dim_matrix[0][2] + dim_matrix[1][2] + dim_matrix[2][0]);
     }
     if (dim_matrix.size() == 4) {
-        cout << "       Detected A set of 4" << endl;
+        if (VERBOSE) cout << "       Detected A set of 4" << endl;
         local_dims.push_back(dim_matrix[0][0] + dim_matrix[1][0] + dim_matrix[2][0] + dim_matrix[3][1]);
         local_dims.push_back(dim_matrix[0][1] + dim_matrix[1][1] + dim_matrix[2][1] + dim_matrix[3][2]);
         local_dims.push_back(dim_matrix[0][2] + dim_matrix[1][2] + dim_matrix[2][2] + dim_matrix[3][0]);
@@ -160,13 +170,15 @@ void customer::package_handler(vector<size_t> &resort_splice) {
                 if (VERBOSE) cout << "       matched: " << net_weight << " <= " << box_types[i].weight << endl;
                 if (product_configurations(dim_matrix, i)) {
                     if (VERBOSE) cout << "       Selected a package ->" << box_types[i].name << endl;
+                    net_price += box_types[i].price;
+                    ++mirror_btypes[i];
                     double price = box_types[i].price;
                     if (box_types[i].name == "LS5" || box_types[i].name == "SO") {
                         double diff = 0.0;
                         if (box_types[i].name == "LS5") diff = net_weight - 32;
                         else diff = net_weight - 48;
                         price = box_types[i].price + (ceil(diff / 16.0) * 0.38);
-                        cout << "       Calculated Price: " << price << endl;
+                        if (VERBOSE) cout << "       Calculated Price: " << price << endl;
                     }
                     location temp({address, order[resort_splice[0]].location});
                     queue.push({{order_index[resort_splice[0]]}, temp, i, order[resort_splice[0]].weight + 7, price});
@@ -189,13 +201,15 @@ void customer::package_handler(vector<size_t> &resort_splice) {
                         if (order[resort_splice[0]].weight <= box_types[i].weight) {
                             if (VERBOSE) cout << "       validated: " << order[resort_splice[0]].weight << " <= " << box_types[i].weight << endl;
                             if (VERBOSE) cout << "       Selected a package ->" << box_types[i].name << endl;
+                            net_price += box_types[i].price;
+                            ++mirror_btypes[i];
                             double price = order[resort_splice[0]].weight;
                             if (box_types[i].name == "LS5" || box_types[i].name == "SO") {
                                 double diff = 0.0;
                                 if (box_types[i].name == "LS5") diff = box_types[i].weight - 32;
                                 else diff = box_types[i].weight - 48;
                                 price = box_types[i].price + (ceil(diff / 16.0) * 0.38);
-                                cout << "       Calculated Price: " << price << endl;
+                                if (VERBOSE) cout << "       Calculated Price: " << price << endl;
                             }
                             location temp({address, order[resort_splice[0]].location});
                             // the product index from the list or products, the location, the index of the dimension from the list, the combined pacakge and product weight
@@ -232,6 +246,8 @@ void customer::construct_order() {
         for (size_t i = 0; i < num_products; ++i) {
             size_t prod = udistr(gen);
             order.push_back(catalogue[prod]);
+            net_sales += catalogue[prod].price;
+            ++mirror_catalogue[prod];
             order_index.push_back(prod);
             history.push_back(prod);
             if (VERBOSE) cout << catalogue[prod].name << endl;
@@ -270,6 +286,32 @@ void customer::display(size_t i) {
 
 //////////////////////////////////////////SAHARA FUNCTIONS///////////////////////////////////////////////////////////////////////////////////////////////////////
 
+sahara::sahara() {
+    run_company();
+    
+}
+
+
+
+void sahara::run_company() {
+    for (size_t i = 0; i < 500; ++i) {
+        date.display();
+        // insert function
+        if (i % 5 == 0)generate_customer_accounts(1);
+        
+        handle_orders();
+        
+        cout << clients.size() << endl;
+    }
+    for (size_t j = 0; j < mirror_catalogue.size(); ++j) {
+        cout << catalogue[j].name << " : " << mirror_catalogue[j] << endl;
+    }
+    for (size_t k = 0; k < mirror_btypes.size(); ++k) {
+        cout << box_types[k].name << " : " << mirror_btypes[k] << endl;
+    }
+    cout << std::fixed << net_price << endl;
+    cout << std::fixed << net_sales << endl;
+}
 
 void sahara::initialize_supporting_materials() {
     // initializes the names lists
@@ -278,3 +320,43 @@ void sahara::initialize_supporting_materials() {
 
 }
 
+// the scale will modify how many new customers can be added at once, and will scale up
+// as thr company grows larger
+size_t sahara::generate_customer_accounts(size_t scale) {
+    random_device rd; // obtain a random number from hardware
+    mt19937 gen(rd()); // seed the generator
+    uniform_int_distribution<> idistr(0, 100); // generate a uniform dist
+
+    size_t hello = 0, cap = idistr(gen);
+    for (size_t i = 0; i < cap; ++i) {
+        customer temp;
+        clients.push_back(temp);
+        hello += temp.order.size();
+    }
+    if (VERBOSE) cout << cap << " new customers with: " << hello << " starting orders\n";
+    return 9;
+}
+
+void sahara::handle_orders() {
+    random_device rd; // obtain a random number from hardware
+    mt19937 gen(rd()); // seed the generator
+    uniform_int_distribution<> idistr(0, (int) clients.size() - 1); // generate a uniform dist
+    size_t order_count = 0;
+    for (size_t i = 0; i < clients.size(); ++i) {
+        size_t cust_index = idistr(gen);
+        clients[cust_index].reorder();
+        order_count += clients[cust_index].order.size();
+        if (VERBOSE) cout << "customer: " << cust_index << " has been chosen -> \n";
+    }
+}
+
+
+void sahara::display_customers() {
+    for (size_t i = 0; i < clients.size(); ++i) {
+        customer & ryan = clients[i];
+        cout << "#" << i << " [" + ryan.name + "] (" << ryan.address.first << ", "
+            << ryan.address.second << ") SPM->" << ryan.supreme << " CORD: "
+            << ryan.order.size() << " HIST: " << ryan.history.size() << " Rord: "
+            << ryan.reorder_count << "\n";
+    }
+}
